@@ -60,3 +60,4 @@ constraints:
 * I had a lot of trouble dealing with using a custom glibc. I need to work on this because it's really hard to make it all work especially with special linkers. I couldn't get the exploit to work locally- it segfaulted. However, in `gdb`, I saw that `/bin/dash` was forked so I assume it worked.
 
 * `scanf()` will stop reading at a whitespace or EOL or null byte. Therefore, you can't really write a multiple 64-bit address with leading `0x00` bytes. You can't make a whole ROP chain because of this. I tried to run `gets()` when I got control of RIP but that segfaulted.
+
